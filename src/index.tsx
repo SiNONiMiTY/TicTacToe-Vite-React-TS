@@ -1,111 +1,102 @@
-import React from 'react'
+import React, { useState } from 'react'
 import ReactDOM from 'react-dom/client'
 import './index.css'
 
-// INTERFACES
-// ==========
+// TYPES & INTERFACES
+// ==================
 
-interface boardState {
-    squares: Array<string>,
-    xIsNext: boolean,
+type TSquare = Array<string | null>
+
+interface IGameState {
+    squares: TSquare,
+    nextTurnX: boolean,
 }
 
-interface squareProps {
+interface ISquareProps {
     onClick: () => void,
-    value: string | number | null,
-}
-
-// CLASS COMPONENTS
-// ================
-
-class Board extends React.Component<{}, boardState> {
-    constructor( props: {} ) {
-        super( props )
-
-        this.state = {
-            squares: Array( 9 ).fill( null ),
-            xIsNext: true,
-        }
-    }
-
-    handleClick( i: number ) {
-        const squares = this.state.squares.slice()
-
-        if ( squares[i] || calculateWinner( squares ) ) {
-            return
-        }
-
-        squares[i] = this.state.xIsNext ? 'X' : 'O'
-
-        this.setState( {
-            squares: squares,
-            xIsNext: !this.state.xIsNext,
-        } )
-    }
-
-    render() {
-        const winner = calculateWinner( this.state.squares )
-
-        let status
-
-        if ( winner ) {
-            status = `Winner: ${winner}`
-        } else {
-            status = `Next player: ${this.state.xIsNext ? 'X' : 'O'}`
-        }
-
-        return (
-            <div>
-                <div className='status'>{status}</div>
-                <div className='board-row'>
-                    {this.renderSquare( 0 )}
-                    {this.renderSquare( 1 )}
-                    {this.renderSquare( 2 )}
-                </div>
-                <div className='board-row'>
-                    {this.renderSquare( 3 )}
-                    {this.renderSquare( 4 )}
-                    {this.renderSquare( 5 )}
-                </div>
-                <div className='board-row'>
-                    {this.renderSquare( 6 )}
-                    {this.renderSquare( 7 )}
-                    {this.renderSquare( 8 )}
-                </div>
-            </div>
-        )
-    }
-
-    renderSquare( i: number ) {
-        return (
-            <Square
-                value={this.state.squares[i]}
-                onClick={() => this.handleClick( i )}
-            />
-        )
-    }
-}
-
-class Game extends React.Component {
-    render() {
-        return (
-            <div className='game'>
-                <div className='game-board'>
-                    <Board />
-                </div>
-                <div className='game-info'>
-                    <div>{/* status */}</div>
-                    <ol>{/* TODO */}</ol>
-                </div>
-            </div>
-        )
-    }
+    value: string | null,
 }
 
 // FUNCTION COMPONENTS
 // ===================
 
-function Square( props: squareProps ) {
+const Board: React.FC = () => {
+    // STATE HOOKS
+    const [squares, setSquares] = useState<TSquare>( Array( 9 ).fill( null ) )
+    const [nextTurnX, setNextTurnX] = useState<boolean>( true )
+
+    // METHODS
+    const handleClick = ( i: number ) => {
+        const copyOfSquares: TSquare = squares.slice()
+
+        if ( copyOfSquares[i] || calculateWinner( copyOfSquares ) ) {
+            return
+        }
+
+        copyOfSquares[i] = nextTurnX ? 'X' : 'O'
+
+        setSquares( copyOfSquares )
+        setNextTurnX( !nextTurnX )
+    }
+
+    const renderSquare = ( i: number ) => {
+        return (
+            <Square
+                value={squares[i]}
+                onClick={() => handleClick( i )}
+            />
+        )
+    }
+
+    // PRE-RENDER LOGIC
+    const winner = calculateWinner( squares )
+
+    let status
+
+    if ( winner ) {
+        status = `Winner: ${winner}`
+    } else {
+        status = `Next player: ${nextTurnX ? 'X' : 'O'}`
+    }
+
+    // RENDER
+    return (
+        <div>
+            <div className='status'>{status}</div>
+            <div className='board-row'>
+                {renderSquare( 0 )}
+                {renderSquare( 1 )}
+                {renderSquare( 2 )}
+            </div>
+            <div className='board-row'>
+                {renderSquare( 3 )}
+                {renderSquare( 4 )}
+                {renderSquare( 5 )}
+            </div>
+            <div className='board-row'>
+                {renderSquare( 6 )}
+                {renderSquare( 7 )}
+                {renderSquare( 8 )}
+            </div>
+        </div>
+    )
+}
+
+const Game: React.FC = () => {
+    return (
+        <div className='game'>
+            <div className='game-board'>
+                <Board />
+            </div>
+            <div className='game-info'>
+                <div>{/* status */}</div>
+                <ol>{/* TODO */}</ol>
+            </div>
+        </div>
+    )
+}
+
+const Square: React.FC<ISquareProps> = ( props ) => {
     return (
         <button className="square" onClick={props.onClick}>
             {props.value}
@@ -116,7 +107,7 @@ function Square( props: squareProps ) {
 // FUNCTIONS
 // =========
 
-function calculateWinner( squares: Array<string> ) {
+function calculateWinner( squares: TSquare ) {
     const lines = [
         [0, 1, 2],
         [3, 4, 5],
