@@ -2,14 +2,19 @@ import React, { useState } from 'react'
 import ReactDOM from 'react-dom/client'
 import './index.css'
 
-// TYPES & INTERFACES
-// ==================
+// TYPES
+// =====
 
 type TSquare = Array<string | null>
 
-interface IGameState {
+type TTurnHistory = Array<{ squares: TSquare }>
+
+// INTERFACES
+// ==========
+
+interface IBoardProps {
+    onClick: ( i: number ) => void,
     squares: TSquare,
-    nextTurnX: boolean,
 }
 
 interface ISquareProps {
@@ -20,49 +25,94 @@ interface ISquareProps {
 // FUNCTION COMPONENTS
 // ===================
 
-const Board: React.FC = () => {
+const Game: React.FC = () => {
     // STATE HOOKS
-    const [squares, setSquares] = useState<TSquare>( Array( 9 ).fill( null ) )
+    const [turnHistory, setTurnHistory] = useState<TTurnHistory>( [{ squares: Array( 9 ).fill( null ) }] )
+    const [stepNumber, setStepNumber] = useState<number>( 0 )
     const [nextTurnX, setNextTurnX] = useState<boolean>( true )
 
     // METHODS
     const handleClick = ( i: number ) => {
-        const copyOfSquares: TSquare = squares.slice()
+        const history = turnHistory.slice( 0, stepNumber + 1 )
+        const current = history[history.length - 1]
+        const squares = current.squares.slice()
 
-        if ( copyOfSquares[i] || calculateWinner( copyOfSquares ) ) {
+        if ( squares[i] || calculateWinner( squares ) ) {
             return
         }
 
-        copyOfSquares[i] = nextTurnX ? 'X' : 'O'
+        squares[i] = nextTurnX ? 'X' : 'O'
 
-        setSquares( copyOfSquares )
+        setTurnHistory( history.concat( [{ squares: squares }] ) )
+        setStepNumber( history.length )
         setNextTurnX( !nextTurnX )
     }
 
-    const renderSquare = ( i: number ) => {
-        return (
-            <Square
-                value={squares[i]}
-                onClick={() => handleClick( i )}
-            />
-        )
+    const jumpTo = ( step: number ) => {
+        setStepNumber( step )
+        setNextTurnX( ( step % 2 ) === 0 )
     }
 
     // PRE-RENDER LOGIC
-    const winner = calculateWinner( squares )
+    const history = turnHistory
+    const current = history[stepNumber]
+    const winner = calculateWinner( current.squares )
+
+    const moves = history.map( ( step, move ) => {
+        const desc = move ? 'Go to move #' + move : 'Go to game start'
+
+        return (
+            <li key={move}>
+                <button
+                    onClick={() => jumpTo( move )}
+                >
+                    {desc}
+                </button>
+            </li>
+        )
+    } )
 
     let status
 
     if ( winner ) {
         status = `Winner: ${winner}`
+    } else if ( current.squares.every( square => square !== null ) ) {
+        status = 'Draw!'
     } else {
         status = `Next player: ${nextTurnX ? 'X' : 'O'}`
     }
 
     // RENDER
     return (
+        <div className='game'>
+            <div className='game-board'>
+                <Board
+                    squares={current.squares}
+                    onClick={i => handleClick( i )}
+                />
+            </div>
+            <div className='game-info'>
+                <div>{status}</div>
+                <ol>{moves}</ol>
+            </div>
+        </div>
+    )
+}
+
+const Board: React.FC<IBoardProps> = ( props ) => {
+    // METHODS
+    const renderSquare = ( i: number ) => {
+        return (
+            <Square
+                value={props.squares[i]}
+                onClick={() => props.onClick( i )}
+            />
+        )
+    }
+
+    // RENDER
+    return (
         <div>
-            <div className='status'>{status}</div>
             <div className='board-row'>
                 {renderSquare( 0 )}
                 {renderSquare( 1 )}
@@ -82,23 +132,10 @@ const Board: React.FC = () => {
     )
 }
 
-const Game: React.FC = () => {
-    return (
-        <div className='game'>
-            <div className='game-board'>
-                <Board />
-            </div>
-            <div className='game-info'>
-                <div>{/* status */}</div>
-                <ol>{/* TODO */}</ol>
-            </div>
-        </div>
-    )
-}
-
 const Square: React.FC<ISquareProps> = ( props ) => {
+    // RENDER
     return (
-        <button className="square" onClick={props.onClick}>
+        <button className='square' onClick={props.onClick}>
             {props.value}
         </button>
     )
@@ -133,5 +170,16 @@ function calculateWinner( squares: TSquare ) {
 // ENTRY POINT
 // ===========
 
-const root = ReactDOM.createRoot( document.getElementById( 'root' )! )
-root.render( <Game /> )
+const rootElement = document.getElementById( 'root' )
+
+if ( rootElement ) {
+    const root = ReactDOM.createRoot( rootElement )
+
+    root.render(
+        <React.StrictMode>
+            <Game />
+        </React.StrictMode>
+    )
+} else {
+    console.warn( 'No root element found in entry point.' )
+}
