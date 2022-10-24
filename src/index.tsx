@@ -1,25 +1,25 @@
-import React, { useState } from 'react'
+import React from 'react'
 import ReactDOM from 'react-dom/client'
 import './index.css'
 
 // TYPES
 // =====
 
-type TSquare = Array<string | null>
+type TSquare = 'X' | 'O' | null
 
-type TTurnHistory = Array<{ squares: TSquare }>
+type TTurnHistory = { squares: TSquare[] }[]
 
 // INTERFACES
 // ==========
 
 interface IBoardProps {
     onClick: ( i: number ) => void,
-    squares: TSquare,
+    squares: TSquare[],
 }
 
 interface ISquareProps {
     onClick: () => void,
-    value: string | null,
+    value: TSquare,
 }
 
 // FUNCTION COMPONENTS
@@ -27,9 +27,9 @@ interface ISquareProps {
 
 const Game: React.FC = () => {
     // STATE HOOKS
-    const [turnHistory, setTurnHistory] = useState<TTurnHistory>( [{ squares: Array( 9 ).fill( null ) }] )
-    const [stepNumber, setStepNumber] = useState<number>( 0 )
-    const [nextTurnX, setNextTurnX] = useState<boolean>( true )
+    const [turnHistory, setTurnHistory] = React.useState<TTurnHistory>( [{ squares: Array( 9 ).fill( null ) }] )
+    const [stepNumber, setStepNumber] = React.useState<number>( 0 )
+    const [nextTurnX, setNextTurnX] = React.useState<boolean>( true )
 
     // METHODS
     const handleClick = ( i: number ) => {
@@ -144,7 +144,7 @@ const Square: React.FC<ISquareProps> = ( props ) => {
 // FUNCTIONS
 // =========
 
-function calculateWinner( squares: TSquare ) {
+function calculateWinner( squares: TSquare[] ) {
     const lines = [
         [0, 1, 2],
         [3, 4, 5],

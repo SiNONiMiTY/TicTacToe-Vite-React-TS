@@ -10,10 +10,21 @@
     "javascript.format.semicolons": "remove",
     "javascript.updateImportsOnFileMove.enabled": "always",
 
+    "json.format.keepLines": true,
+
+    "redhat.telemetry.enabled": false,
+
     "typescript.format.insertSpaceAfterOpeningAndBeforeClosingNonemptyParenthesis": true,
     "typescript.format.insertSpaceBeforeFunctionParenthesis": false,
     "typescript.format.semicolons": "remove",
     "typescript.updateImportsOnFileMove.enabled": "always",
+
+    "yaml.format.enable": true,
+    "yaml.format.singleQuote": true,
+    "yaml.format.bracketSpacing": true,
+    "yaml.schemas": {
+        "https://json.schemastore.org/eslintrc.json": "/.eslintrc.yaml"
+    },
 
     "[html]": {
         "editor.formatOnSave": true,
@@ -31,6 +42,8 @@
     },
 
     "[yaml]": {
+        "editor.formatOnSave": false,
+        "editor.defaultFormatter": "redhat.vscode-yaml",
         "editor.tabSize": 4,
     },
 }

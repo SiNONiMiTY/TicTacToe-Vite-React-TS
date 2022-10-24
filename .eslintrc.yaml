@@ -1,0 +1,60 @@
+# OPTIMIZED FOR FRONTEND PROJECTS (REACT)
+
+env:
+    browser: true
+    node: true
+    es2022: true
+
+extends:
+    - eslint:recommended
+    - plugin:@typescript-eslint/recommended
+
+parser: '@typescript-eslint/parser'
+
+parserOptions:
+    ecmaVersion: 2022
+    sourceType: module
+
+plugins:
+    - '@typescript-eslint'
+
+overrides: [
+    {
+        files: [
+            '*.jsx',
+            '*.tsx',
+        ],
+        extends: [
+            plugin:react/recommended,
+            plugin:react-hooks/recommended,
+        ],
+        parserOptions: {
+            ecmaFeatures: {
+                jsx: true
+            },
+        },
+        plugins: [
+            react,
+            react-hooks
+        ]
+    },
+]
+
+rules:
+    # Error level must always come first before the actual option value
+    # https://eslint.org/docs/latest/rules
+    arrow-parens:
+        - error
+        - always
+    eqeqeq:
+        - error
+        - always
+    indent:
+        - error
+        - 4
+    quotes:
+        - error
+        - single
+    semi:
+        - error
+        - never
